@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<script>
+/* ---- STARTUP GUARD: turn any white screen into a readable, screenshottable error. ---- */
+(function(){
+  window.__bootErr=function(msg){
+    try{
+      var d=document.getElementById('booterror');
+      if(!d){ d=document.createElement('div'); d.id='booterror';
+        d.style.cssText='position:fixed;inset:0;z-index:99999;background:#0b0906;color:#ff9a3c;'+
+          'font:12px/1.55 ui-monospace,Menlo,Consolas,monospace;padding:22px;overflow:auto;white-space:pre-wrap;-webkit-user-select:text;user-select:text';
+        (document.body||document.documentElement).appendChild(d);
+      }
+      d.textContent='BADADAN hub failed to start — screenshot this:\n\n'+msg;
+    }catch(_){}
+  };
+  window.addEventListener('error',function(e){
+    var m=(e&&e.message)||'error';
+    if(e&&e.error&&e.error.stack) m+='\n'+e.error.stack;
+    window.__bootErr(m);
+  });
+  window.addEventListener('unhandledrejection',function(e){
+    var r=e&&e.reason; window.__bootErr('Unhandled promise: '+((r&&(r.stack||r.message))||r));
+  });
+})();
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#0b0906" />
+<title>BADADAN | The Game The Grind The Glory</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Rajdhani:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --void:#0b0906; --void2:#120d07; --panel:rgba(18,13,7,.82); --panel2:rgba(14,10,6,.94);
+    --orange:#ff7a1a; --orange2:#ffa04d; --ember:#ff4d17; --mag:#ff2d78; --cyan:#4fd1c5;
+    --gold:#ffd23d; --ink:#f6f1e8; --dim:#9b8f7e; --line:rgba(255,255,255,.10);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;overflow:hidden;background:var(--void);color:var(--ink);font-family:'Rajdhani',system-ui,sans-serif}
+  canvas{display:block}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+  .disp{font-family:'Anton',Impact,sans-serif;letter-spacing:.03em;text-transform:uppercase}
+  .mono{font-family:'Space Mono',monospace}
+  .chamfer{clip-path:polygon(0 12px,12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%)}
+  #bg{position:fixed;inset:0;background:
+      radial-gradient(120% 90% at 18% -10%, rgba(255,45,120,.14), transparent 55%),
+      radial-gradient(120% 90% at 85% 110%, rgba(255,122,26,.16), transparent 55%),
+      var(--void)}
+  #grid{position:fixed;inset:0;opacity:.14;background-image:
+      linear-gradient(rgba(255,255,255,.5) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(255,255,255,.5) 1px,transparent 1px);
+      background-size:42px 42px;mask-image:radial-gradient(80% 70% at 50% 40%,#000 40%,transparent 100%)}
+
+  #hero{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+      padding:5vh 4vw 3vh;z-index:2;overflow-y:auto}
+  #baddwrap{width:min(260px,42vw);height:min(260px,42vw);position:relative;margin-top:1vh;flex:0 0 auto}
+  #baddcv{width:100%;height:100%;display:block}
+  #baddfall{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;
+      font-family:'Space Mono',monospace;font-size:10.5px;color:var(--dim);line-height:1.6;padding:10px}
+
+  h1.logo{font-size:clamp(40px,9vw,84px);text-align:center;line-height:.92;margin-top:1.2vh;
+      background:linear-gradient(90deg,var(--mag),var(--orange) 55%,var(--gold));
+      -webkit-background-clip:text;background-clip:text;color:transparent;
+      filter:drop-shadow(0 4px 22px rgba(255,80,20,.35))}
+  .tagline{font-family:'Space Mono',monospace;font-size:clamp(10px,1.8vw,13px);letter-spacing:.22em;
+      color:var(--dim);text-transform:uppercase;margin-top:.4em;text-align:center}
+  .tagline b{color:var(--orange2)}
+
+  #modes{display:flex;gap:clamp(12px,2.4vw,26px);margin-top:4.2vh;width:100%;max-width:920px;
+      flex-wrap:wrap;justify-content:center}
+  .mode{flex:1 1 320px;max-width:420px;background:var(--panel);border:1px solid var(--line);
+      backdrop-filter:blur(8px);padding:22px 22px 20px;text-align:left;position:relative;
+      transition:transform .18s ease, border-color .18s ease, box-shadow .18s ease}
+  .mode:hover{transform:translateY(-4px);border-color:var(--accent);box-shadow:0 14px 40px -18px var(--accent)}
+  .mode.a{--accent:var(--mag)}
+  .mode.b{--accent:var(--orange)}
+  .mode .tag{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.2em;color:var(--accent);
+      text-transform:uppercase;margin-bottom:8px}
+  .mode h2{font-size:clamp(22px,3.4vw,30px);line-height:1}
+  .mode p{font-size:13px;color:var(--dim);margin-top:10px;line-height:1.55;min-height:58px}
+  .mode .go{display:inline-flex;align-items:center;gap:8px;margin-top:16px;padding:10px 18px;
+      background:var(--accent);color:#0a0705;font-weight:700;font-size:13px;letter-spacing:.04em;
+      text-decoration:none;border-radius:3px}
+  .mode .go:hover{filter:brightness(1.08)}
+  .mode .num{position:absolute;top:16px;right:18px;font-family:'Anton',Impact,sans-serif;
+      font-size:34px;color:rgba(255,255,255,.06)}
+
+  #footnote{margin-top:4vh;font-family:'Space Mono',monospace;font-size:10.5px;color:var(--dim);
+      text-align:center;max-width:560px;line-height:1.7;padding-bottom:2vh}
+  #footnote b{color:var(--ink)}
+</style>
+</head>
+<body>
+<div id="bg"></div>
+<div id="grid"></div>
+
+<div id="hero">
+  <div id="baddwrap">
+    <canvas id="baddcv"></canvas>
+    <div id="baddfall">BADD.glb not found —<br>drop it next to this page<br>(or in assets/models/) to see him spin here.</div>
+  </div>
+
+  <h1 class="logo disp">BADADAN</h1>
+  <div class="tagline mono">The Game <b>·</b> The Grind <b>·</b> The Glory</div>
+
+  <div id="modes">
+    <a class="mode a chamfer" href="Trapcity.html">
+      <div class="num">01</div>
+      <div class="tag">2D + 3D + DAW</div>
+      <h2 class="disp">Beat Hunter</h2>
+      <p>Run the neon streets of Trap City, chase the beat, build your own tracks in the built-in DAW.</p>
+      <span class="go chamfer">▶ ENTER TRAP CITY</span>
+    </a>
+    <a class="mode b chamfer" href="BADADAN.html">
+      <div class="num">02</div>
+      <div class="tag">The Grind</div>
+      <h2 class="disp">BADADAN</h2>
+      <p>Chase the hype, stack the goal bar to 1000, and go for glory in the original grind.</p>
+      <span class="go chamfer">▶ START THE GRIND</span>
+    </a>
+  </div>
+
+  <div id="footnote">
+    Both modes share the same runner — <b>BADD.glb</b> — loaded once from this folder.
+    Keep <b>Trapcity.html</b>, <b>BADADAN.html</b>, and this hub together
+    (and <b>BADD.glb</b> in <b>assets/models/</b> or right alongside them) when you upload to GitHub Pages.
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script>
+/* =====================================================================
+   BADD.glb LOADER — same relative-path fallback list used by both games,
+   so the hub's turntable finds the model wherever it's actually sitting.
+   ===================================================================== */
+var BADD = (function(){
+  var buf=null, state='idle', waiters=[];
+  var URLS=['BADD.glb','assets/models/BADD.glb','assets/BADD.glb','./BADD.glb'];
+  function fetchIt(){
+    if(state!=='idle') return; state='loading';
+    var i=0;
+    function next(){
+      if(i>=URLS.length){ state='fail'; flushAll(); return; }
+      var u=URLS[i++];
+      fetch(u).then(function(r){ if(!r.ok) throw 0; return r.arrayBuffer(); })
+        .then(function(ab){ buf=ab; state='ok'; flushAll(); })
+        .catch(function(){ next(); });
+    }
+    next();
+  }
+  function flushAll(){ var w=waiters; waiters=[]; w.forEach(function(cb){ cb(state==='ok'?buf:null); }); }
+  function get(cb){
+    if(state==='ok'){ cb(buf); return; }
+    if(state==='fail'){ cb(null); return; }
+    waiters.push(cb); fetchIt();
+  }
+  function parse(onDone,onFail){
+    get(function(ab){
+      if(!ab || typeof THREE==='undefined' || typeof THREE.GLTFLoader==='undefined'){ onFail&&onFail(); return; }
+      try{
+        var loader=new THREE.GLTFLoader();
+        loader.parse(ab.slice(0), '', onDone, function(){ onFail&&onFail(); });
+      }catch(e){ onFail&&onFail(); }
+    });
+  }
+  function measure(root){
+    root.updateMatrixWorld(true);
+    var boneBox=new THREE.Box3(); boneBox.makeEmpty();
+    var meshBox=new THREE.Box3(); meshBox.makeEmpty();
+    var bones=0, skinned=false, hips=null, v=new THREE.Vector3();
+    root.traverse(function(o){
+      if(o.isBone){ bones++; o.getWorldPosition(v); boneBox.expandByPoint(v); if(!hips) hips=v.clone(); }
+      if(o.isSkinnedMesh){ skinned=true; }
+      else if(o.isMesh && o.geometry){
+        if(!o.geometry.boundingBox) o.geometry.computeBoundingBox();
+        if(o.geometry.boundingBox){ var b=o.geometry.boundingBox.clone(); b.applyMatrix4(o.matrixWorld); meshBox.union(b); }
+      }
+    });
+    var box=null;
+    if(skinned && bones>2 && !boneBox.isEmpty()){
+      box=boneBox.clone();
+      var bh=box.max.y-box.min.y;
+      if(bh>0){ box.max.y+=bh*0.05; box.min.y-=bh*0.02; }
+    }
+    if((!box||box.isEmpty()) && !meshBox.isEmpty()) box=meshBox;
+    if((!box||box.isEmpty()) && !boneBox.isEmpty()) box=boneBox.clone();
+    var ok = box && !box.isEmpty() &&
+             isFinite(box.min.x)&&isFinite(box.max.x)&&
+             isFinite(box.min.y)&&isFinite(box.max.y)&&
+             (box.max.y-box.min.y)>1e-5;
+    if(!ok) box=new THREE.Box3(new THREE.Vector3(-0.4,0,-0.4), new THREE.Vector3(0.4,1.8,0.4));
+    var pivot = hips || box.getCenter(new THREE.Vector3());
+    if(!isFinite(pivot.x)) pivot.x=0;
+    if(!isFinite(pivot.z)) pivot.z=0;
+    return { box:box, pivot:pivot, height:box.max.y-box.min.y, skinned:skinned, bones:bones };
+  }
+  return { parse:parse, prefetch:fetchIt, measure:measure };
+})();
+
+/* =====================================================================
+   HUB TURNTABLE — BADD.glb slowly rotating beside the logo
+   ===================================================================== */
+(function(){
+  var cv=document.getElementById('baddcv'), wrap=document.getElementById('baddwrap');
+  var fall=document.getElementById('baddfall');
+  if(!cv || typeof THREE==='undefined'){ return; }
+  var r,s,cam,grp,mix,clock=0,raf=null;
+
+  BADD.parse(function(gltf){
+    try{
+      r=new THREE.WebGLRenderer({canvas:cv,alpha:true,antialias:true});
+      r.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+      s=new THREE.Scene();
+      cam=new THREE.PerspectiveCamera(38,1,0.1,100);
+      s.add(new THREE.AmbientLight(0xfff0dd,1.0));
+      var k=new THREE.DirectionalLight(0xffffff,1.15); k.position.set(2,3,4); s.add(k);
+      var rim=new THREE.DirectionalLight(0xff2d78,0.9); rim.position.set(-3,1,-2); s.add(rim);
+
+      var root=gltf.scene;
+      var m=BADD.measure(root);
+      grp=new THREE.Group();
+      var inner=new THREE.Group();
+      inner.add(root);
+      inner.position.set(-m.pivot.x, -m.box.min.y, -m.pivot.z);
+      grp.add(inner);
+      var scale = 1.7 / (m.height||1.78);
+      grp.scale.setScalar(scale);
+      s.add(grp);
+
+      cam.position.set(0, m.height*scale*0.55, 3.1);
+      cam.lookAt(0, m.height*scale*0.5, 0);
+
+      if(gltf.animations && gltf.animations.length){
+        mix=new THREE.AnimationMixer(root);
+        mix.clipAction(gltf.animations[0]).play();
+      }
+
+      fall.style.display='none';
+      resize();
+      window.addEventListener('resize',resize);
+      var last=performance.now();
+      (function tick(t){
+        raf=requestAnimationFrame(tick);
+        var dt=Math.min((t-last)/1000,0.05); last=t;
+        clock+=dt;
+        if(grp) grp.rotation.y = clock*0.55;
+        if(mix) mix.update(dt);
+        r.render(s,cam);
+      })(last);
+    }catch(e){ fall.textContent='BADD.glb found but failed to render — check console.'; }
+  }, function(){
+    /* fail: leave the fallback message showing */
+  });
+
+  function resize(){
+    if(!r||!cam) return;
+    var w=wrap.clientWidth, h=wrap.clientHeight;
+    r.setSize(w,h,true);
+    cam.aspect=w/h; cam.updateProjectionMatrix();
+  }
+})();
+</script>
+</body>
+</html>
